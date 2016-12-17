@@ -1,0 +1,7 @@
+#!/bin/sh
+INPUTSIZE=$(stat -c %s $2)
+PROG="./qad"
+VERSION=$($PROG v)
+INFO=$(file -be elf $PROG)
+#make &&
+echo "\n$(date)" >> q.log && echo "QAD version: $VERSION internal; $INFO" >> q.log && ( time -f " Stats C.Time: %U s user, %S s system, %E total;  Used %P CPU, memory: %M kB" $PROG $1 $2 $3 || ( echo "$2, $INPUTSIZE byte(s) COMPRESSION FAILED!\n" && echo "$2, $INPUTSIZE byte(s) COMPRESSION FAILED!" >> q.log  && false ) ) 2> q_stats_err.log && echo "" && echo " $2 -> $3; $INPUTSIZE byte(s) -> $(stat -c %s $3); comp. mode: $1" >> q.log && cat q_stats_err.log | tee -a q.log && ( time -f " Stats D.Time: %U s user, %S s system, %E total;  Used %P CPU, memory: %M kB" $PROG d $3 $3.dec || ( echo "DECOMPRESSION FAILED!\n" && echo "DECOMPRESSION FAILED!" >> q.log  && false ) ) 2> q_stats_err.log && echo "" && cat q_stats_err.log | tee -a q.log && echo "\n COMPARING ORIGINAL AND UNCOMPRESSED FILES ($2, $3.dec):" && ( cmp $2 "$3.dec" || ( echo "File comparision(Original vs decompressed: $3.dec) FAILED!" >> q.log  && false ) ) && echo "OK!\n" && echo "OK!" >> q.log
